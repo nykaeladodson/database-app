@@ -5,9 +5,7 @@
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "node index.js",
-    "create database": "psql createdb pet",
-    "setup database": "psql pet -f setup.sql"
+    "start": "node index.js"
   },
   "keywords": [],
   "author": "",
