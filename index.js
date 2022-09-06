@@ -1,11 +1,13 @@
 const express = require('express')
 const app = express()
+
 const pgp = require('pg-promise')()
 const db = pgp({
   user: 'nykaeladodson',
   port: 5432,
   database: 'pet',
-  host: 'localhost'
+  host: 'localhost',
+  password: process.env.DB_PASSWORD,
 })
 
 app.get('/', (request, response) => {
