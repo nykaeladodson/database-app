@@ -1,58 +1,46 @@
-import express from 'express';
-import mongodb from 'mongodb';
-import dotenv from 'dotenv';
-import pgp from 'pg-promise';
-dotenv.config();
+const express = require('express')
+const app = express()
+const pgp = require('pg-promise')()
+const mongoose = require('mongoose')
+const Cat = require('./setup_mongo.js')
+require('dotenv').config()
 
-const app = express();
 app.use(express.json());
 
-const db = pgp()({
+const postgresDB = pgp({
   user: process.env.POSTGRES_USERNAME,
   port: 5432,
   database: 'pet',
-  host: 'localhost',
-  password: process.env.POSTGRES_PASSWORD,
-});
+  host: 'localhost'
+})
 
-let connectionString = process.env.MONGO_URI;
-
-let mdb
-const init = async () => {
-  try {
-    mdb = await mongodb.MongoClient.connect(
-      connectionString,
-      function(err, client) {
-        mdb = client.db()
-      });
-    console.log('connection successful')
-  } catch (error) {
-    console.log(error);
-  }
-};
+const mongoDBURI = process.env.MONGO_URI
+mongoose.connect(mongoDBURI, {useNewUrlParser: true, useUnifiedTopology: true});
+const mongoDB = mongoose.connection;
+mongoDB.on('error', (error) => console.log('mongo connection error'))
+mongoDB.once('connected', () => console.log('Mongo connected'))
 
 app.get('/', (request, response) => {
-  response.send("hello world")
-});
+  response.send("hello world!!")
+})
 
 app.get('/pets/dogs', (request, response) => {
-  db.any('SELECT name FROM dogs;')
-    .then(data => response.json(data));
-});
+  postgresDB.any('SELECT name FROM dogs;')
+    .then(data => response.json(data))
+})
 
-app.get('/pets/cat', async (request, response) => {
-  console.log(mdb)
-  const allCats =  await mdb.collection('cats').find();
-  return response.send(allCats);
-});
+app.get('/pets/cats', async (request, response) => {
+  try {
+    const data = await Cat.find();
+    response.json(data)
+  } catch(error) {
+    response.status(500).json({message: error.message})
+  }
+})
 
-(async() => {
-  await init();
-
-  app.listen(3001, () => {
-    console.log('app is listening on port 3001');
-  })
-})();
+app.listen(3001, () => {
+  console.log('App running on port 3001')
+})
 
 
 
