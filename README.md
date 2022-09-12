@@ -1,4 +1,4 @@
-# database-app
+# database-app:
 
 ## Create pet database
 ## Create table and insert data from setup.sql
